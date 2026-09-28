@@ -1,4 +1,12 @@
 const mongoose = require('mongoose');
+const dns = require('node:dns');
+
+// Force Google DNS to prevent Windows/ISP querySrv ECONNREFUSED with MongoDB Atlas
+try {
+  dns.setServers(['8.8.8.8', '8.8.4.4']);
+} catch (err) {
+  // fallback gracefully
+}
 
 /**
  * Connects to MongoDB database using Mongoose.

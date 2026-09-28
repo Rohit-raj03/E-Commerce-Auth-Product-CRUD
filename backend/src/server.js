@@ -5,8 +5,10 @@ const dnsServers = process.env.MONGODB_DNS_SERVERS?.split(",")
   .map((server) => server.trim())
   .filter(Boolean);
 
-if (dnsServers?.length) {
-  dns.setServers(dnsServers);
+try {
+  dns.setServers(dnsServers?.length ? dnsServers : ["8.8.8.8", "8.8.4.4"]);
+} catch (err) {
+  // fallback gracefully
 }
 
 const app = require("./app");
