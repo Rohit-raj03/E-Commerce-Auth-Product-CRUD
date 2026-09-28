@@ -17,15 +17,27 @@ const productSchema = new mongoose.Schema(
       required: [true, 'Product price is required'],
       min: [0, 'Price must be a positive number'],
     },
+    category: {
+      type: String,
+      required: [true, 'Category is required'],
+      default: 'General',
+      trim: true,
+    },
     stock: {
       type: Number,
       required: [true, 'Stock count is required'],
       min: [0, 'Stock cannot be negative'],
+      default: 0,
     },
     image: {
       type: String,
       required: [true, 'Product image URL is required'],
       trim: true,
+    },
+    sellerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: [true, 'Product must belong to a seller'],
     },
   },
   {

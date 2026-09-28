@@ -4,7 +4,14 @@ import api, { setAccessToken } from '../services/api';
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('auth_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -15,10 +22,13 @@ export const AuthProvider = ({ children }) => {
         setAccessToken(accessToken);
 
         const meResponse = await api.get('/auth/me');
-        setUser(meResponse.data.user);
+        const userData = meResponse.data.user;
+        setUser(userData);
+        localStorage.setItem('auth_user', JSON.stringify(userData));
       } catch (error) {
         setAccessToken(null);
         setUser(null);
+        localStorage.removeItem('auth_user');
       } finally {
         setLoading(false);
       }
@@ -33,7 +43,8 @@ export const AuthProvider = ({ children }) => {
       const { accessToken, user: userData } = response.data;
       setAccessToken(accessToken);
       setUser(userData);
-      return { success: true, message: response.data.message };
+      localStorage.setItem('auth_user', JSON.stringify(userData));
+      return { success: true, message: response.data.message, user: userData };
     } catch (error) {
       const errorMsg =
         error.response?.data?.message || 'Login failed. Please check your credentials.';
@@ -42,15 +53,16 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const register = async (name, email, password, confirmPassword) => {
+  const register = async (name, email, password, confirmPassword, role = 'user') => {
     try {
       const response = await api.post('/auth/register', {
         name,
         email,
         password,
         confirmPassword,
+        role,
       });
-      return { success: true, message: response.data.message };
+      return { success: true, message: response.data.message, user: response.data.user };
     } catch (error) {
       const errorMsg =
         error.response?.data?.message || 'Registration failed. Please try again.';
@@ -67,6 +79,8 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setAccessToken(null);
       setUser(null);
+      localStorage.removeItem('auth_user');
+      localStorage.removeItem('cart_items');
     }
   };
 
@@ -76,6 +90,9 @@ export const AuthProvider = ({ children }) => {
         user,
         loading,
         isAuthenticated: !!user,
+        role: user?.role || 'guest',
+        isSeller: user?.role === 'seller',
+        isUser: user?.role === 'user',
         login,
         register,
         logout,

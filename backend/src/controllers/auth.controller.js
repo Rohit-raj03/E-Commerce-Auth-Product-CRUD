@@ -9,12 +9,12 @@ const {
 } = require('../utils/jwt');
 
 /**
- * Register a new user
+ * Register a new user or seller
  * POST /api/auth/register
  */
 const register = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -29,21 +29,25 @@ const register = async (req, res, next) => {
     // Hash password
     const hashedPassword = await hashPassword(password);
 
+    // Sanitize role: user or seller
+    const userRole = role === 'seller' ? 'seller' : 'user';
+
     // Create user
     const user = await User.create({
       name,
       email,
       password: hashedPassword,
+      role: userRole,
     });
 
-    // Return response without generating tokens as per requirements
     return res.status(201).json({
       success: true,
-      message: 'User registered successfully',
+      message: `${userRole === 'seller' ? 'Seller' : 'User'} registered successfully`,
       user: {
         id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (error) {
@@ -52,7 +56,7 @@ const register = async (req, res, next) => {
 };
 
 /**
- * Login user
+ * Login user / seller
  * POST /api/auth/login
  */
 const login = async (req, res, next) => {
@@ -79,9 +83,9 @@ const login = async (req, res, next) => {
       });
     }
 
-    // Generate tokens
-    const accessToken = generateAccessToken({ id: user._id });
-    const refreshToken = generateRefreshToken({ id: user._id });
+    // Generate tokens embedding role
+    const accessToken = generateAccessToken({ id: user._id, role: user.role });
+    const refreshToken = generateRefreshToken({ id: user._id, role: user.role });
 
     // Hash refresh token for server-side MongoDB storage
     const tokenHash = hashToken(refreshToken);
@@ -97,7 +101,7 @@ const login = async (req, res, next) => {
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
 
@@ -109,6 +113,7 @@ const login = async (req, res, next) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (error) {
@@ -153,7 +158,6 @@ const refreshToken = async (req, res, next) => {
     });
 
     if (!storedTokenDoc) {
-      // Token not found (revoked or reused)
       res.clearCookie('refreshToken');
       return res.status(403).json({
         success: false,
@@ -165,8 +169,11 @@ const refreshToken = async (req, res, next) => {
     // Refresh Token Rotation: remove used refresh token & issue new pair
     await RefreshToken.findByIdAndDelete(storedTokenDoc._id);
 
-    const newAccessToken = generateAccessToken({ id: decoded.id });
-    const newRefreshToken = generateRefreshToken({ id: decoded.id });
+    const userDoc = await User.findById(decoded.id);
+    const role = userDoc ? userDoc.role : (decoded.role || 'user');
+
+    const newAccessToken = generateAccessToken({ id: decoded.id, role });
+    const newRefreshToken = generateRefreshToken({ id: decoded.id, role });
     const newTokenHash = hashToken(newRefreshToken);
     const newExpiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
@@ -179,7 +186,7 @@ const refreshToken = async (req, res, next) => {
     res.cookie('refreshToken', newRefreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -209,7 +216,7 @@ const logout = async (req, res, next) => {
     res.clearCookie('refreshToken', {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     });
 
     return res.status(200).json({
@@ -242,6 +249,7 @@ const me = async (req, res, next) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        role: user.role,
       },
     });
   } catch (error) {

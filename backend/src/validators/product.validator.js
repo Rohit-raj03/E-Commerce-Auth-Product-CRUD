@@ -23,6 +23,11 @@ const productValidator = [
     .trim()
     .notEmpty()
     .withMessage('Product image URL is required'),
+  body('category')
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage('Category cannot be empty'),
 ];
 
 const productIdValidator = [

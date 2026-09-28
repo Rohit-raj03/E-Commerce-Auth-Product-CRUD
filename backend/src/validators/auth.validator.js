@@ -24,6 +24,12 @@ const registerValidator = [
       }
       return true;
     }),
+  body('role')
+    .optional()
+    .trim()
+    .toLowerCase()
+    .isIn(['user', 'seller'])
+    .withMessage('Role must be either "user" or "seller"'),
 ];
 
 const loginValidator = [
