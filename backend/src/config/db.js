@@ -6,10 +6,6 @@ try {
   dns.setServers(["8.8.8.8", "8.8.4.4"]);
 } catch (e) {}
 
-/**
- * Converts SRV Atlas URI to direct standard replica set URI
- * to avoid Windows / local ISP querySrv ECONNREFUSED permanently.
- */
 const getCleanMongoURI = (rawUri) => {
   if (!rawUri) return rawUri;
   if (rawUri.startsWith("mongodb+srv://") && rawUri.includes("cluster0.r6gi37h.mongodb.net")) {
@@ -18,15 +14,31 @@ const getCleanMongoURI = (rawUri) => {
   return rawUri;
 };
 
+let cachedPromise = null;
+
 const connectDB = async () => {
-  try {
-    const uri = getCleanMongoURI(process.env.MONGODB_URI);
-    const conn = await mongoose.connect(uri);
-    console.log(`MongoDB Connected: ${conn.connection.host}`);
-  } catch (error) {
-    console.error(`Database Connection Error: ${error.message}`);
-    process.exit(1);
+  if (mongoose.connection.readyState >= 1) {
+    return;
   }
+
+  if (!cachedPromise) {
+    const uri = getCleanMongoURI(process.env.MONGODB_URI);
+    cachedPromise = mongoose.connect(uri, {
+      serverSelectionTimeoutMS: 5000,
+    }).then((conn) => {
+      console.log(`MongoDB Connected: ${conn.connection.host}`);
+      return conn;
+    }).catch((error) => {
+      cachedPromise = null;
+      console.error(`Database Connection Error: ${error.message}`);
+      if (process.env.NODE_ENV !== 'production') {
+        process.exit(1);
+      }
+      throw error;
+    });
+  }
+
+  return cachedPromise;
 };
 
 module.exports = connectDB;
