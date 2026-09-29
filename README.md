@@ -16,6 +16,7 @@ A full-stack, production-ready MERN e-commerce application featuring **Role-Base
 The application enforces strict separation of concerns across both frontend routes and backend APIs for two distinct user roles:
 
 ### 1. 🏪 Seller Role
+
 - **Seller Dashboard (`/seller/dashboard`)**:
   - **Metrics & KPIs**: Total Listings, Total Units in Stock, Asset Valuation (₹), and Low Stock Alerts ($\le 5$ units).
   - **Product Table**: Quick search by name or category, stock status indicators (`In Stock`, `Low Stock`, `Out of Stock`), and instant action buttons.
@@ -26,6 +27,7 @@ The application enforces strict separation of concerns across both frontend rout
 - **Backend Protection**: Sellers can only update or delete products they created.
 
 ### 2. 🛍️ Customer (User) Role
+
 - **Storefront & Catalog (`/products`)**:
   - Search by title and description.
   - Filter by categories (`Clothing`, `Footwear`, `Accessories`, `Electronics`, `Home & Living`, `General`).
@@ -47,22 +49,23 @@ The application enforces strict separation of concerns across both frontend rout
 
 ## 🛡️ Route Protection Matrix
 
-| Route | Guest | Customer (`user`) | Seller (`seller`) |
-| :--- | :---: | :---: | :---: |
-| `/login` & `/register` | ✅ Allowed | 🔄 Redirected to `/products` | 🔄 Redirected to `/seller/dashboard` |
-| `/products` | ✅ View only | ✅ View & Add to Cart | ✅ View (with dashboard shortcut) |
-| `/products/:id` | ✅ View only | ✅ View & Add to Cart | ✅ View details |
-| `/cart` | 🔒 Redirect to Login | ✅ Full Access | 🔒 Redirected to `/seller/dashboard` |
-| `/seller/dashboard` | 🔒 Redirect to Login | ⛔ 403 Forbidden | ✅ Full Access |
-| `/seller/products` | 🔒 Redirect to Login | ⛔ 403 Forbidden | ✅ Full Access |
-| `/seller/products/add` | 🔒 Redirect to Login | ⛔ 403 Forbidden | ✅ Full Access |
-| `/seller/products/edit/:id` | 🔒 Redirect to Login | ⛔ 403 Forbidden | ✅ Full Access |
+| Route                       |        Guest         |      Customer (`user`)       |          Seller (`seller`)           |
+| :-------------------------- | :------------------: | :--------------------------: | :----------------------------------: |
+| `/login` & `/register`      |      ✅ Allowed      | 🔄 Redirected to `/products` | 🔄 Redirected to `/seller/dashboard` |
+| `/products`                 |     ✅ View only     |    ✅ View & Add to Cart     |  ✅ View (with dashboard shortcut)   |
+| `/products/:id`             |     ✅ View only     |    ✅ View & Add to Cart     |           ✅ View details            |
+| `/cart`                     | 🔒 Redirect to Login |        ✅ Full Access        | 🔒 Redirected to `/seller/dashboard` |
+| `/seller/dashboard`         | 🔒 Redirect to Login |       ⛔ 403 Forbidden       |            ✅ Full Access            |
+| `/seller/products`          | 🔒 Redirect to Login |       ⛔ 403 Forbidden       |            ✅ Full Access            |
+| `/seller/products/add`      | 🔒 Redirect to Login |       ⛔ 403 Forbidden       |            ✅ Full Access            |
+| `/seller/products/edit/:id` | 🔒 Redirect to Login |       ⛔ 403 Forbidden       |            ✅ Full Access            |
 
 ---
 
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **Framework**: React 18 (Vite)
 - **Routing**: React Router DOM v6
 - **Styling**: Tailwind CSS
@@ -70,6 +73,7 @@ The application enforces strict separation of concerns across both frontend rout
 - **HTTP Client**: Axios with interceptors (automatic token refresh handling)
 
 ### Backend
+
 - **Runtime**: Node.js & Express.js
 - **Database**: MongoDB with Mongoose ODM
 - **Authentication**: JSON Web Tokens (Access Token + Refresh Token via HTTP-only Cookie)
@@ -82,6 +86,7 @@ The application enforces strict separation of concerns across both frontend rout
 ## 📦 Data Models
 
 ### User Model (`User.js`)
+
 ```javascript
 {
   name: { type: String, required: true },
@@ -93,6 +98,7 @@ The application enforces strict separation of concerns across both frontend rout
 ```
 
 ### Product Model (`Product.js`)
+
 ```javascript
 {
   name: { type: String, required: true },
@@ -106,6 +112,7 @@ The application enforces strict separation of concerns across both frontend rout
 ```
 
 ### Cart Model (`Cart.js`)
+
 ```javascript
 {
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
@@ -123,32 +130,35 @@ The application enforces strict separation of concerns across both frontend rout
 ## 🔌 API Endpoints Reference
 
 ### Authentication (`/api/auth`)
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/auth/register` | Public | Register new account with role (`user` or `seller`) |
-| `POST` | `/api/auth/login` | Public | Login & receive JWT access + refresh tokens |
-| `POST` | `/api/auth/refresh-token` | Public | Generate new access token via refresh token |
-| `POST` | `/api/auth/logout` | Authenticated | Revoke refresh token and clear cookies |
-| `GET` | `/api/auth/me` | Authenticated | Get current authenticated user details and role |
+
+| Method | Endpoint                  | Access        | Description                                         |
+| :----- | :------------------------ | :------------ | :-------------------------------------------------- |
+| `POST` | `/api/auth/register`      | Public        | Register new account with role (`user` or `seller`) |
+| `POST` | `/api/auth/login`         | Public        | Login & receive JWT access + refresh tokens         |
+| `POST` | `/api/auth/refresh-token` | Public        | Generate new access token via refresh token         |
+| `POST` | `/api/auth/logout`        | Authenticated | Revoke refresh token and clear cookies              |
+| `GET`  | `/api/auth/me`            | Authenticated | Get current authenticated user details and role     |
 
 ### Products (`/api/products`)
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/products` | Public | Get all products (with search & category filters) |
-| `GET` | `/api/products/:id` | Public | Get single product details |
-| `GET` | `/api/products/seller/my-products` | Seller | Get all products owned by authenticated seller |
-| `POST` | `/api/products` | Seller | Create a new product listing |
-| `PUT` | `/api/products/:id` | Seller (Owner) | Update an existing product |
-| `DELETE` | `/api/products/:id` | Seller (Owner) | Delete a product |
+
+| Method   | Endpoint                           | Access         | Description                                       |
+| :------- | :--------------------------------- | :------------- | :------------------------------------------------ |
+| `GET`    | `/api/products`                    | Public         | Get all products (with search & category filters) |
+| `GET`    | `/api/products/:id`                | Public         | Get single product details                        |
+| `GET`    | `/api/products/seller/my-products` | Seller         | Get all products owned by authenticated seller    |
+| `POST`   | `/api/products`                    | Seller         | Create a new product listing                      |
+| `PUT`    | `/api/products/:id`                | Seller (Owner) | Update an existing product                        |
+| `DELETE` | `/api/products/:id`                | Seller (Owner) | Delete a product                                  |
 
 ### Cart (`/api/cart`)
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/cart` | User | Get current user's cart items with subtotals |
-| `POST` | `/api/cart/items` | User | Add item to cart or increment quantity |
-| `PUT` | `/api/cart/items/:productId` | User | Update quantity (`[-] / [+]` with stock validation) |
-| `DELETE` | `/api/cart/items/:productId` | User | Remove specific item from cart |
-| `DELETE` | `/api/cart` | User | Clear all items from cart |
+
+| Method   | Endpoint                     | Access | Description                                         |
+| :------- | :--------------------------- | :----- | :-------------------------------------------------- |
+| `GET`    | `/api/cart`                  | User   | Get current user's cart items with subtotals        |
+| `POST`   | `/api/cart/items`            | User   | Add item to cart or increment quantity              |
+| `PUT`    | `/api/cart/items/:productId` | User   | Update quantity (`[-] / [+]` with stock validation) |
+| `DELETE` | `/api/cart/items/:productId` | User   | Remove specific item from cart                      |
+| `DELETE` | `/api/cart`                  | User   | Clear all items from cart                           |
 
 ---
 
@@ -218,22 +228,26 @@ authentication-product-crud/
 ## ⚙️ Local Development Setup
 
 ### Prerequisites
+
 - Node.js (v18+)
 - MongoDB Atlas or local MongoDB instance
 
 ### 1. Clone Repository
+
 ```bash
 git clone https://github.com/Rohit-raj03/E-Commerce-Auth-Product-CRUD.git
 cd E-Commerce-Auth-Product-CRUD
 ```
 
 ### 2. Backend Setup
+
 ```bash
 cd backend
 npm install
 ```
 
 Create a `.env` file in `backend/`:
+
 ```env
 PORT=5000
 MONGODB_URI=your_mongodb_connection_string
@@ -245,22 +259,26 @@ NODE_ENV=development
 ```
 
 Start the backend server:
+
 ```bash
 npm run dev
 ```
 
 ### 3. Frontend Setup
+
 ```bash
 cd ../frontend
 npm install
 ```
 
 Create a `.env` file in `frontend/`:
+
 ```env
 VITE_API_URL=http://localhost:5000/api
 ```
 
 Start the frontend development server:
+
 ```bash
 npm run dev
 ```
@@ -289,4 +307,5 @@ Visit `http://localhost:5173` in your browser.
 ---
 
 ## 📄 License
+
 This project is open-source and available under the [MIT License](LICENSE).

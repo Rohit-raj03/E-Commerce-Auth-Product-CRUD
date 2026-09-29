@@ -1,19 +1,19 @@
-const express = require('express');
-const cors = require('cors');
-const cookieParser = require('cookie-parser');
-const authRoutes = require('./routes/auth.routes');
-const productRoutes = require('./routes/product.routes');
-const cartRoutes = require('./routes/cart.routes');
-const errorHandler = require('./middleware/error.middleware');
-const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = require('./swagger-output.json');
+const express = require("express");
+const cors = require("cors");
+const cookieParser = require("cookie-parser");
+const authRoutes = require("./routes/auth.routes");
+const productRoutes = require("./routes/product.routes");
+const cartRoutes = require("./routes/cart.routes");
+const errorHandler = require("./middleware/error.middleware");
+const swaggerUi = require("swagger-ui-express");
+const swaggerDocument = require("./swagger-output.json");
 
 const app = express();
 
 const allowedOrigins = [
-  'https://e-commerce-auth-product-crud.vercel.app',
-  'http://localhost:5173',
-  'http://localhost:3000',
+  "https://e-commerce-auth-product-crud.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:3000",
   process.env.CLIENT_URL,
 ].filter(Boolean);
 
@@ -21,13 +21,17 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin) || origin.endsWith('.vercel.app')) {
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        origin.endsWith(".vercel.app")
+      ) {
         return callback(null, true);
       }
       return callback(null, true);
     },
     credentials: true,
-  })
+  }),
 );
 
 // Body parsing and Cookie Parser middleware
@@ -36,16 +40,24 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Swagger API Documentation
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes);
-app.use('/api/cart', cartRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/cart", cartRoutes);
 
+// rout endpoint
+app.get("/", (req, res) => {
+  res
+    .status(200)
+    .json({ success: true, message: "Server is running sucessfully" });
+});
 // Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.status(200).json({ success: true, message: 'Server is running smoothly' });
+app.get("/api/health", (req, res) => {
+  res
+    .status(200)
+    .json({ success: true, message: "Server is running smoothly" });
 });
 
 // Handle 404 for undefined routes

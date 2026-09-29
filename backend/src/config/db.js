@@ -11,9 +11,9 @@ let cachedPromise = null;
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGODB_URI);
+    console.log("mongoDB connection successfully");
   } catch (error) {
     console.log("something wrong db connecting");
-    
   }
 };
 
