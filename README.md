@@ -1,311 +1,807 @@
-# AURA — E-Commerce with Role-Based Authentication & Product Management
+🛍️ AURA — Full-Stack E-Commerce
 
-A full-stack, production-ready MERN e-commerce application featuring **Role-Based Access Control (RBAC)** for **Sellers** and **Users (Customers)**, product inventory CRUD, live cart calculations with quantity controls, and dual-token JWT authentication.
+AURA is a full-stack MERN e-commerce application with Role-Based Authentication (RBAC) for Sellers and Customers.
 
----
+The project is divided into two independent applications:
 
-## 🌐 Live Deployments
+- Frontend → React + Vite
+- Backend → Node.js + Express + MongoDB
 
-- **Live Frontend**: [https://frontend-phi-opal-sdltz1z9hh.vercel.app/products](https://frontend-phi-opal-sdltz1z9hh.vercel.app/products)
-- **Live Backend API**: [https://e-commerce-auth-product-crud-5lot.vercel.app](https://e-commerce-auth-product-crud-5lot.vercel.app)
-
----
-
-## 🚀 Key Highlights & Role Architecture
-
-The application enforces strict separation of concerns across both frontend routes and backend APIs for two distinct user roles:
-
-### 1. 🏪 Seller Role
-
-- **Seller Dashboard (`/seller/dashboard`)**:
-  - **Metrics & KPIs**: Total Listings, Total Units in Stock, Asset Valuation (₹), and Low Stock Alerts ($\le 5$ units).
-  - **Product Table**: Quick search by name or category, stock status indicators (`In Stock`, `Low Stock`, `Out of Stock`), and instant action buttons.
-- **Product Management (`/seller/products`)**: Dedicated catalog view with filtering and search.
-- **Create Product (`/seller/products/add`)**: Create listings with name, category, price, stock, description, and live image URL preview.
-- **Edit Product (`/seller/products/edit/:id`)**: Update product details, pricing, categories, and stock levels.
-- **Delete Product**: Secure deletion with ownership verification.
-- **Backend Protection**: Sellers can only update or delete products they created.
-
-### 2. 🛍️ Customer (User) Role
-
-- **Storefront & Catalog (`/products`)**:
-  - Search by title and description.
-  - Filter by categories (`Clothing`, `Footwear`, `Accessories`, `Electronics`, `Home & Living`, `General`).
-  - Stock indicators and quick "Add to Cart" action.
-  - Seller-only CRUD buttons (Add, Edit, Delete) are hidden from regular users.
-- **Product Details (`/products/:id`)**:
-  - Full product specifications, craftsmanship description, stock availability badge, and quantity selector.
-- **Interactive Shopping Cart (`/cart`)**:
-  - **`[-] Quantity [+]` Controls**:
-    - `+` increases quantity (strictly capped at available product stock).
-    - `-` decreases quantity (minimum quantity of 1).
-    - Remove item action with instant calculation.
-  - **Real-Time Financial Calculations**:
-    - Item Subtotal: $\text{Price} \times \text{Quantity}$.
-    - Cart Subtotal, Estimated Tax (5%), Free Shipping threshold (> ₹999), and Grand Total.
-  - **Checkout Flow**: Interactive checkout process with order placement and cart reset.
+The frontend communicates with the backend through REST APIs.
 
 ---
 
-## 🛡️ Route Protection Matrix
+🌐 Live Deployments
 
-| Route                       |        Guest         |      Customer (`user`)       |          Seller (`seller`)           |
-| :-------------------------- | :------------------: | :--------------------------: | :----------------------------------: |
-| `/login` & `/register`      |      ✅ Allowed      | 🔄 Redirected to `/products` | 🔄 Redirected to `/seller/dashboard` |
-| `/products`                 |     ✅ View only     |    ✅ View & Add to Cart     |  ✅ View (with dashboard shortcut)   |
-| `/products/:id`             |     ✅ View only     |    ✅ View & Add to Cart     |           ✅ View details            |
-| `/cart`                     | 🔒 Redirect to Login |        ✅ Full Access        | 🔒 Redirected to `/seller/dashboard` |
-| `/seller/dashboard`         | 🔒 Redirect to Login |       ⛔ 403 Forbidden       |            ✅ Full Access            |
-| `/seller/products`          | 🔒 Redirect to Login |       ⛔ 403 Forbidden       |            ✅ Full Access            |
-| `/seller/products/add`      | 🔒 Redirect to Login |       ⛔ 403 Forbidden       |            ✅ Full Access            |
-| `/seller/products/edit/:id` | 🔒 Redirect to Login |       ⛔ 403 Forbidden       |            ✅ Full Access            |
+Frontend
 
----
+https://frontend-phi-opal-sdltz1z9hh.vercel.app/products
 
-## 🛠️ Tech Stack
+Backend API
 
-### Frontend
+https://e-commerce-auth-product-crud-5lot.vercel.app
 
-- **Framework**: React 18 (Vite)
-- **Routing**: React Router DOM v6
-- **Styling**: Tailwind CSS
-- **Icons**: Lucide React
-- **HTTP Client**: Axios with interceptors (automatic token refresh handling)
+API Documentation
 
-### Backend
-
-- **Runtime**: Node.js & Express.js
-- **Database**: MongoDB with Mongoose ODM
-- **Authentication**: JSON Web Tokens (Access Token + Refresh Token via HTTP-only Cookie)
-- **Password Security**: Bcrypt.js (salted hashing)
-- **Validation**: Express-Validator
-- **Documentation**: Swagger UI (`/api/docs`)
+https://e-commerce-auth-product-crud-5lot.vercel.app/api/docs
 
 ---
 
-## 📦 Data Models
+🏗️ Architecture
 
-### User Model (`User.js`)
+                    ┌─────────────────────┐
+                    │      AURA USER      │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │   React Frontend    │
+                    │      Vite           │
+                    │   Tailwind CSS      │
+                    └──────────┬──────────┘
+                               │
+                         REST API / Axios
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │   Express Backend   │
+                    │      Node.js        │
+                    │ JWT Authentication  │
+                    │      RBAC           │
+                    └──────────┬──────────┘
+                               │
+                               ▼
+                    ┌─────────────────────┐
+                    │    MongoDB Atlas    │
+                    │      Mongoose       │
+                    └─────────────────────┘
 
-```javascript
+---
+
+🚀 Features
+
+🔐 Authentication
+
+- User registration
+- Seller registration
+- Login
+- Logout
+- JWT authentication
+- Access Token
+- Refresh Token
+- HTTP-only refresh-token cookie
+- Password hashing using bcrypt
+- Current-user endpoint
+- Automatic access-token refresh
+- Protected frontend routes
+- Backend authentication middleware
+
+---
+
+👥 Role-Based Access Control
+
+AURA supports two roles:
+
+user
+seller
+
+🛍️ Customer
+
+Customers can:
+
+- Browse products
+- Search products
+- Filter products by category
+- View product details
+- Add products to cart
+- Increase quantity
+- Decrease quantity
+- Remove cart items
+- View cart calculations
+- Checkout / place an order
+
+Customers cannot:
+
+- Create products
+- Edit products
+- Delete products
+- Access seller dashboard
+
+---
+
+🏪 Seller
+
+Sellers can:
+
+- Access seller dashboard
+- View inventory statistics
+- Create products
+- View their products
+- Search products
+- Filter products
+- Edit their products
+- Delete their products
+- Manage stock
+- View inventory valuation
+
+A seller can only edit or delete products that belong to them.
+
+---
+
+📊 Seller Dashboard
+
+The seller dashboard provides:
+
+- Total Listings
+- Total Units in Stock
+- Inventory Valuation
+- Low Stock Alerts
+- Product search
+- Category filtering
+- Stock status
+
+Stock Status
+
+Stock > 5
+    ↓
+In Stock
+
+Stock 1–5
+    ↓
+Low Stock
+
+Stock = 0
+    ↓
+Out of Stock
+
+---
+
+🛒 Shopping Cart
+
+Customers have a complete shopping cart system.
+
+Quantity Controls
+
+[-] Quantity [+]
+
+Rules:
+
+- Minimum quantity = "1"
+- Maximum quantity = available product stock
+- Quantity cannot exceed stock
+- Product can be removed from cart
+- Cart can be cleared
+
+Cart Calculations
+
+Item Subtotal
+= Product Price × Quantity
+
+Cart Subtotal
+= Sum of all item subtotals
+
+Estimated Tax
+= Cart Subtotal × 5%
+
+Shipping
+= Free when subtotal > ₹999
+
+Grand Total
+= Subtotal + Tax + Shipping
+
+---
+
+🛡️ Route Protection
+
+Route| Guest| Customer| Seller
+"/login"| ✅| 🔄 Products| 🔄 Seller Dashboard
+"/register"| ✅| 🔄 Products| 🔄 Seller Dashboard
+"/products"| ✅ View| ✅ View + Cart| ✅ View
+"/products/:id"| ✅ View| ✅ View + Cart| ✅ View
+"/cart"| 🔒 Login| ✅| 🔒 Seller Dashboard
+"/seller/dashboard"| 🔒 Login| ❌| ✅
+"/seller/products"| 🔒 Login| ❌| ✅
+"/seller/products/add"| 🔒 Login| ❌| ✅
+"/seller/products/edit/:id"| 🔒 Login| ❌| ✅
+
+---
+
+🛠️ Tech Stack
+
+Frontend
+
+- React 18
+- Vite
+- React Router
+- Tailwind CSS
+- Lucide React
+- Axios
+- Context API
+
+Backend
+
+- Node.js
+- Express.js
+- MongoDB
+- Mongoose
+- JWT
+- bcrypt.js
+- Express Validator
+- Swagger UI
+
+---
+
+📁 Project Structure
+
+The frontend and backend are maintained separately.
+
+Frontend
+
+AURA-Frontend/
+│
+├── src/
+│   ├── components/
+│   │   ├── Navbar.jsx
+│   │   └── ProtectedRoute.jsx
+│   │
+│   ├── context/
+│   │   ├── AuthContext.jsx
+│   │   └── CartContext.jsx
+│   │
+│   ├── pages/
+│   │   ├── Login.jsx
+│   │   ├── Register.jsx
+│   │   ├── Products.jsx
+│   │   ├── ProductDetails.jsx
+│   │   ├── Cart.jsx
+│   │   ├── SellerDashboard.jsx
+│   │   ├── SellerProducts.jsx
+│   │   ├── AddProduct.jsx
+│   │   └── EditProduct.jsx
+│   │
+│   ├── routes/
+│   │   └── AppRoutes.jsx
+│   │
+│   ├── services/
+│   │   └── api.js
+│   │
+│   ├── App.jsx
+│   └── main.jsx
+│
+├── .env
+├── .env.example
+├── package.json
+└── vite.config.js
+
+---
+
+📁 Backend Structure
+
+AURA-Backend/
+│
+├── src/
+│   ├── config/
+│   │   └── db.js
+│   │
+│   ├── controllers/
+│   │   ├── auth.controller.js
+│   │   ├── product.controller.js
+│   │   └── cart.controller.js
+│   │
+│   ├── middleware/
+│   │   ├── auth.middleware.js
+│   │   └── role.middleware.js
+│   │
+│   ├── models/
+│   │   ├── User.js
+│   │   ├── Product.js
+│   │   └── Cart.js
+│   │
+│   ├── routes/
+│   │   ├── auth.routes.js
+│   │   ├── product.routes.js
+│   │   └── cart.routes.js
+│   │
+│   ├── validators/
+│   │   ├── auth.validator.js
+│   │   └── product.validator.js
+│   │
+│   ├── app.js
+│   └── server.js
+│
+├── .env
+├── .env.example
+└── package.json
+
+---
+
+🗄️ Database Models
+
+User
+
 {
-  name: { type: String, required: true },
-  email: { type: String, required: true, unique: true },
-  password: { type: String, required: true },
-  role: { type: String, enum: ['user', 'seller'], default: 'user' },
-  refreshToken: { type: String }
+  name: String,
+  email: String,
+  password: String,
+  role: {
+    type: String,
+    enum: ["user", "seller"],
+    default: "user"
+  },
+  refreshToken: String
 }
-```
 
-### Product Model (`Product.js`)
+---
 
-```javascript
+Product
+
 {
-  name: { type: String, required: true },
-  description: { type: String, required: true },
-  price: { type: Number, required: true, min: 0 },
-  stock: { type: Number, required: true, min: 0, default: 0 },
-  category: { type: String, required: true, default: 'General' },
-  image: { type: String, required: true },
-  sellerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+  name: String,
+  description: String,
+  price: Number,
+  stock: Number,
+  category: String,
+  image: String,
+  sellerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User"
+  }
 }
-```
 
-### Cart Model (`Cart.js`)
+---
 
-```javascript
+Cart
+
 {
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true, unique: true },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User"
+  },
+
   items: [
     {
-      product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
-      quantity: { type: Number, required: true, min: 1, default: 1 }
+      product: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product"
+      },
+
+      quantity: Number
     }
   ]
 }
-```
 
 ---
 
-## 🔌 API Endpoints Reference
+🔌 API Documentation
 
-### Authentication (`/api/auth`)
+Authentication
 
-| Method | Endpoint                  | Access        | Description                                         |
-| :----- | :------------------------ | :------------ | :-------------------------------------------------- |
-| `POST` | `/api/auth/register`      | Public        | Register new account with role (`user` or `seller`) |
-| `POST` | `/api/auth/login`         | Public        | Login & receive JWT access + refresh tokens         |
-| `POST` | `/api/auth/refresh-token` | Public        | Generate new access token via refresh token         |
-| `POST` | `/api/auth/logout`        | Authenticated | Revoke refresh token and clear cookies              |
-| `GET`  | `/api/auth/me`            | Authenticated | Get current authenticated user details and role     |
+Base URL:
 
-### Products (`/api/products`)
+/api/auth
 
-| Method   | Endpoint                           | Access         | Description                                       |
-| :------- | :--------------------------------- | :------------- | :------------------------------------------------ |
-| `GET`    | `/api/products`                    | Public         | Get all products (with search & category filters) |
-| `GET`    | `/api/products/:id`                | Public         | Get single product details                        |
-| `GET`    | `/api/products/seller/my-products` | Seller         | Get all products owned by authenticated seller    |
-| `POST`   | `/api/products`                    | Seller         | Create a new product listing                      |
-| `PUT`    | `/api/products/:id`                | Seller (Owner) | Update an existing product                        |
-| `DELETE` | `/api/products/:id`                | Seller (Owner) | Delete a product                                  |
-
-### Cart (`/api/cart`)
-
-| Method   | Endpoint                     | Access | Description                                         |
-| :------- | :--------------------------- | :----- | :-------------------------------------------------- |
-| `GET`    | `/api/cart`                  | User   | Get current user's cart items with subtotals        |
-| `POST`   | `/api/cart/items`            | User   | Add item to cart or increment quantity              |
-| `PUT`    | `/api/cart/items/:productId` | User   | Update quantity (`[-] / [+]` with stock validation) |
-| `DELETE` | `/api/cart/items/:productId` | User   | Remove specific item from cart                      |
-| `DELETE` | `/api/cart`                  | User   | Clear all items from cart                           |
+Method| Endpoint| Access| Description
+POST| "/register"| Public| Register user/seller
+POST| "/login"| Public| Login
+POST| "/refresh-token"| Public| Refresh access token
+POST| "/logout"| Authenticated| Logout
+GET| "/me"| Authenticated| Get current user
 
 ---
 
-## 📁 Project Structure
+📦 Product APIs
 
-```
-authentication-product-crud/
-├── backend/
-│   ├── src/
-│   │   ├── config/
-│   │   │   └── db.js                 # MongoDB connection
-│   │   ├── controllers/
-│   │   │   ├── auth.controller.js    # Auth & token handlers
-│   │   │   ├── product.controller.js # Product CRUD & seller filters
-│   │   │   └── cart.controller.js    # Cart items & quantity logic
-│   │   ├── middleware/
-│   │   │   ├── auth.middleware.js    # JWT verification
-│   │   │   └── role.middleware.js    # Role authorization guard
-│   │   ├── models/
-│   │   │   ├── User.js
-│   │   │   ├── Product.js
-│   │   │   └── Cart.js
-│   │   ├── routes/
-│   │   │   ├── auth.routes.js
-│   │   │   ├── product.routes.js
-│   │   │   └── cart.routes.js
-│   │   ├── validators/
-│   │   │   ├── auth.validator.js
-│   │   │   └── product.validator.js
-│   │   ├── app.js                    # Express app configuration
-│   │   └── server.js                 # HTTP listener & DNS setup
-│   ├── .env.example
-│   └── package.json
-│
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── Navbar.jsx            # Dynamic role-based navigation & badges
-│   │   │   └── ProtectedRoute.jsx    # Route-level RBAC guard
-│   │   ├── context/
-│   │   │   ├── AuthContext.jsx       # Auth state, login/register, role helpers
-│   │   │   └── CartContext.jsx       # Cart state, [-] Qty [+], calculations
-│   │   ├── pages/
-│   │   │   ├── Login.jsx             # Role-aware login & redirect
-│   │   │   ├── Register.jsx          # Interactive role picker (User vs Seller)
-│   │   │   ├── Products.jsx          # Storefront catalog & search
-│   │   │   ├── ProductDetails.jsx    # Product specifications & add to cart
-│   │   │   ├── Cart.jsx              # Cart summary, quantity controls & checkout
-│   │   │   ├── SellerDashboard.jsx   # Seller analytics & product management
-│   │   │   ├── SellerProducts.jsx    # Dedicated seller product management
-│   │   │   ├── AddProduct.jsx        # Product creation form
-│   │   │   └── EditProduct.jsx       # Product update form
-│   │   ├── routes/
-│   │   │   └── AppRoutes.jsx         # Declarative routes & route guards
-│   │   ├── services/
-│   │   │   └── api.js                # Axios instance with interceptors
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── .env.example
-│   └── package.json
-│
-└── README.md
-```
+Base URL:
+
+/api/products
+
+Method| Endpoint| Access| Description
+GET| "/"| Public| Get all products
+GET| "/:id"| Public| Get product
+GET| "/seller/my-products"| Seller| Get seller products
+POST| "/"| Seller| Create product
+PUT| "/:id"| Seller + Owner| Update product
+DELETE| "/:id"| Seller + Owner| Delete product
 
 ---
 
-## ⚙️ Local Development Setup
+🛒 Cart APIs
 
-### Prerequisites
+Base URL:
 
-- Node.js (v18+)
-- MongoDB Atlas or local MongoDB instance
+/api/cart
 
-### 1. Clone Repository
+Method| Endpoint| Access| Description
+GET| "/"| User| Get cart
+POST| "/items"| User| Add product
+PUT| "/items/:productId"| User| Update quantity
+DELETE| "/items/:productId"| User| Remove item
+DELETE| "/"| User| Clear cart
 
-```bash
-git clone https://github.com/Rohit-raj03/E-Commerce-Auth-Product-CRUD.git
-cd E-Commerce-Auth-Product-CRUD
-```
+---
 
-### 2. Backend Setup
+🔐 Authentication Flow
 
-```bash
-cd backend
+Register / Login
+       ↓
+Backend validates credentials
+       ↓
+Password verified using bcrypt
+       ↓
+Access Token + Refresh Token
+       ↓
+Access Token → API Authorization
+       ↓
+Refresh Token → HTTP-only Cookie
+       ↓
+Access Token expires
+       ↓
+Axios interceptor requests refresh token
+       ↓
+New Access Token
+       ↓
+Original request continues
+
+---
+
+🛡️ Backend RBAC Flow
+
+Every protected request follows:
+
+Request
+   ↓
+JWT Authentication Middleware
+   ↓
+Is Token Valid?
+   │
+   ├── No → 401 Unauthorized
+   │
+   └── Yes
+        ↓
+     Get User
+        ↓
+     Role Middleware
+        ↓
+   ┌────┴────┐
+   │         │
+ user      seller
+   │         │
+   ❌        ✅
+
+For product update/delete:
+
+Seller Authentication
+        ↓
+Seller Role Check
+        ↓
+Find Product
+        ↓
+Check sellerId === loggedInUser._id
+        ↓
+        ├── No → 403 Forbidden
+        │
+        └── Yes → Update/Delete
+
+---
+
+⚙️ Local Development
+
+Requirements
+
+Make sure you have:
+
+- Node.js 18+
+- npm
+- MongoDB Atlas or local MongoDB
+- Git
+
+---
+
+1️⃣ Clone Frontend
+
+git clone <YOUR_FRONTEND_REPOSITORY_URL>
+
+cd AURA-Frontend
+
 npm install
-```
 
-Create a `.env` file in `backend/`:
+---
 
-```env
-PORT=5000
-MONGODB_URI=your_mongodb_connection_string
-ACCESS_TOKEN_SECRET=your_jwt_access_secret_key
-REFRESH_TOKEN_SECRET=your_jwt_refresh_secret_key
-ACCESS_TOKEN_EXPIRES_IN=15m
-REFRESH_TOKEN_EXPIRES_IN=7d
-NODE_ENV=development
-```
+2️⃣ Frontend Environment Variables
 
-Start the backend server:
+Create:
 
-```bash
-npm run dev
-```
+.env
 
-### 3. Frontend Setup
+Add:
 
-```bash
-cd ../frontend
-npm install
-```
-
-Create a `.env` file in `frontend/`:
-
-```env
 VITE_API_URL=http://localhost:5000/api
-```
 
-Start the frontend development server:
+Start frontend:
 
-```bash
 npm run dev
-```
 
-Visit `http://localhost:5173` in your browser.
+Frontend will run on:
 
----
-
-## 🧪 Testing User Roles
-
-1. **Test as Customer**:
-   - Register choosing the **"I want to Shop"** (Customer) card.
-   - You are redirected to `/products`.
-   - Browse catalog, open product details, and add items to your cart.
-   - Adjust quantities with `[-]` and `[+]`, observing subtotal and total recalculations.
-   - Try navigating to `/seller/dashboard` — you will be automatically redirected to `/products`.
-
-2. **Test as Seller**:
-   - Register choosing the **"I want to Sell"** (Merchant) card.
-   - You are redirected to `/seller/dashboard`.
-   - View your metrics (Total Listings, Stock, Inventory Valuation, Alerts).
-   - Add new products with categories, pricing, stock, and image URLs.
-   - Edit existing listings or delete them.
-   - Changes immediately reflect in the public catalog.
+http://localhost:5173
 
 ---
 
-## 📄 License
+3️⃣ Clone Backend
 
-This project is open-source and available under the [MIT License](LICENSE).
+Open another terminal:
+
+git clone <YOUR_BACKEND_REPOSITORY_URL>
+
+cd AURA-Backend
+
+npm install
+
+---
+
+4️⃣ Backend Environment Variables
+
+Create:
+
+.env
+
+Add:
+
+PORT=5000
+
+MONGODB_URI=your_mongodb_connection_string
+
+ACCESS_TOKEN_SECRET=your_access_token_secret
+
+REFRESH_TOKEN_SECRET=your_refresh_token_secret
+
+ACCESS_TOKEN_EXPIRES_IN=15m
+
+REFRESH_TOKEN_EXPIRES_IN=7d
+
+NODE_ENV=development
+
+Start backend:
+
+npm run dev
+
+Backend will run on:
+
+http://localhost:5000
+
+---
+
+🔗 Frontend → Backend Connection
+
+Frontend uses Axios to communicate with the backend.
+
+Example:
+
+const API = axios.create({
+  baseURL: import.meta.env.VITE_API_URL,
+  withCredentials: true
+});
+
+Production:
+
+VITE_API_URL=https://e-commerce-auth-product-crud-5lot.vercel.app/api
+
+Development:
+
+VITE_API_URL=http://localhost:5000/api
+
+---
+
+🚀 Deployment
+
+Frontend
+
+Recommended deployment:
+
+React + Vite
+     ↓
+Vercel
+
+Set the Vercel environment variable:
+
+VITE_API_URL=https://your-backend-url.com/api
+
+---
+
+Backend
+
+Deploy the Express API separately.
+
+Example:
+
+Node.js + Express
+       ↓
+Vercel / Render / Railway
+       ↓
+MongoDB Atlas
+
+Backend environment variables must be configured in the deployment platform.
+
+---
+
+🔒 Environment Security
+
+Never commit ".env" files.
+
+Add this to ".gitignore":
+
+node_modules/
+.env
+.env.local
+.env.production
+dist/
+
+Never expose these values in frontend code:
+
+MONGODB_URI
+ACCESS_TOKEN_SECRET
+REFRESH_TOKEN_SECRET
+
+Only variables beginning with:
+
+VITE_
+
+should be exposed to the Vite frontend.
+
+---
+
+🧪 Testing
+
+Customer Test
+
+1. Open "/register"
+2. Select I want to Shop
+3. Create account
+4. Login
+5. Open "/products"
+6. Search products
+7. Filter products
+8. Open product details
+9. Add product to cart
+10. Increase/decrease quantity
+11. Remove products
+12. Test checkout
+13. Try opening "/seller/dashboard"
+
+Expected:
+
+Customer → Seller Dashboard
+             ↓
+        Access Denied
+             ↓
+          /products
+
+---
+
+🏪 Seller Test
+
+1. Open "/register"
+2. Select I want to Sell
+3. Create seller account
+4. Login
+5. Open "/seller/dashboard"
+6. Create a product
+7. Edit the product
+8. Change stock
+9. Delete the product
+10. Check the public product catalog
+
+Expected:
+
+Seller
+  ↓
+Seller Dashboard
+  ↓
+Create / Read / Update / Delete
+  ↓
+Own Products Only
+
+---
+
+📌 Important Business Rules
+
+Product Creation
+
+Only sellers can create products.
+
+Customer → ❌
+Seller   → ✅
+
+Product Update
+
+Only the seller who owns the product can update it.
+
+Seller A → Product A → ✅
+
+Seller B → Product A → ❌
+
+Product Delete
+
+Only the product owner can delete the product.
+
+Product Owner → ✅
+Other Seller  → ❌
+Customer      → ❌
+
+Cart
+
+Only customers can use the cart.
+
+Guest     → Login Required
+Customer  → ✅
+Seller    → Seller Dashboard
+
+---
+
+📈 Future Improvements
+
+Possible future features:
+
+- Order management
+- Payment gateway
+- Seller order dashboard
+- Customer order history
+- Product reviews & ratings
+- Wishlist
+- Coupon system
+- Product image upload
+- Cloudinary integration
+- Email verification
+- Forgot password
+- OTP authentication
+- Admin dashboard
+- Seller verification
+- Pagination
+- Advanced product filtering
+- Inventory history
+- Sales analytics
+- Redis caching
+- Rate limiting
+- API versioning
+
+---
+
+📄 License
+
+This project is open-source and available under the MIT License.
+
+---
+
+👨‍💻 Author
+
+Rohit Raj
+
+GitHub:
+
+https://github.com/Rohit-raj03
+
+---
+
+⭐ Project Summary
+
+AURA demonstrates a complete MERN e-commerce architecture with:
+
+React
+  +
+Node.js
+  +
+Express
+  +
+MongoDB
+  +
+JWT Authentication
+  +
+Role-Based Access Control
+  +
+Seller Product CRUD
+  +
+Customer Cart
+  +
+Inventory Management
+
+The frontend and backend are maintained as separate applications, allowing independent development, testing, deployment, and scaling.
